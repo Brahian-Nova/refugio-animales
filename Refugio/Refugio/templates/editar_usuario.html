@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Editar Usuario</title>
+
+<style>
+
+body{
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background:#f4f7fb;
+margin:0;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+/* contenedor */
+
+.card{
+background:white;
+padding:35px;
+width:360px;
+border-radius:10px;
+box-shadow:0 6px 15px rgba(0,0,0,0.1);
+}
+
+/* titulo */
+
+h2{
+text-align:center;
+margin-bottom:25px;
+}
+
+/* inputs */
+
+label{
+font-weight:bold;
+font-size:14px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+border-radius:6px;
+border:1px solid #ddd;
+box-sizing:border-box;
+}
+
+/* boton */
+
+button{
+width:100%;
+padding:10px;
+background:#2f80ed;
+border:none;
+color:white;
+font-size:15px;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#1c5ec4;
+}
+
+/* volver */
+
+.volver{
+display:block;
+text-align:center;
+margin-top:15px;
+text-decoration:none;
+color:#2f80ed;
+font-weight:bold;
+}
+
+.volver:hover{
+text-decoration:underline;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>✏️ Editar Usuario</h2>
+
+<form method="POST" action="/usuarios/actualizar">
+
+<input type="hidden" name="id" value="{{ usuario[0] }}">
+
+<label>Nombre</label>
+<input type="text" name="nombre" value="{{ usuario[1] }}" required>
+
+<label>Email</label>
+<input type="email" name="email" value="{{ usuario[2] }}" required>
+
+<button type="submit">Actualizar</button>
+
+</form>
+
+<a class="volver" href="/usuarios">← Volver a usuarios</a>
+
+</div>
+
+</body>
+
+</html>

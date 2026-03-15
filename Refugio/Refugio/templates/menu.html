@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Panel de Administración</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+
+body{
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background:#f4f7fb;
+margin:0;
+padding:40px;
+text-align:center;
+}
+
+h2{
+margin-bottom:10px;
+}
+
+.bienvenida{
+color:#555;
+margin-bottom:30px;
+}
+
+/* dashboard */
+
+.dashboard{
+display:flex;
+justify-content:center;
+gap:20px;
+margin-bottom:40px;
+flex-wrap:wrap;
+}
+
+.card{
+background:white;
+padding:25px;
+width:200px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card h3{
+margin:0;
+font-size:18px;
+}
+
+.card p{
+font-size:28px;
+font-weight:bold;
+margin-top:10px;
+color:#27ae60;
+}
+
+/* menú */
+
+.menu-links{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:15px;
+}
+
+.menu-links a{
+width:260px;
+padding:12px;
+background:#2f80ed;
+color:white;
+text-decoration:none;
+border-radius:6px;
+font-weight:bold;
+}
+
+.menu-links a:hover{
+background:#1c5ec4;
+}
+
+/* logout */
+
+.logout{
+background:#e74c3c !important;
+}
+
+.logout:hover{
+background:#c0392b !important;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>🐾 Panel de Administración</h2>
+
+<p class="bienvenida">Bienvenido {{usuario}}</p>
+
+<!-- TARJETAS DE ESTADÍSTICAS -->
+
+<div class="dashboard">
+
+<div class="card">
+<h3>👤 Usuarios</h3>
+<p>{{total_usuarios}}</p>
+</div>
+
+<div class="card">
+<h3>🐶 Animales</h3>
+<p>{{total_animales}}</p>
+</div>
+
+<div class="card">
+<h3>🏠 Adoptados</h3>
+<p>{{adoptados}}</p>
+</div>
+
+</div>
+
+<!-- MENÚ -->
+
+<div class="menu-links">
+
+<a href="/usuarios">👤 Administrar Usuarios</a>
+
+<a href="/animales">🐶 Administrar Animales</a>
+
+<a href="/adopciones">🐾 Ver Mascotas en Adopción</a>
+
+<a href="/logout" class="logout">Cerrar sesión</a>
+
+</div>
+
+</body>
+</html>

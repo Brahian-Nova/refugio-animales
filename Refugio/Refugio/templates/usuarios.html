@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Refugio - Usuarios</title>
+
+<style>
+
+body{
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background:#f4f7fb;
+margin:0;
+padding:40px;
+}
+
+/* título */
+
+h1{
+color:#27ae60;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+/* botón volver */
+
+.back-button{
+margin-bottom:20px;
+}
+
+.back-button a{
+text-decoration:none;
+color:#2f80ed;
+font-weight:bold;
+}
+
+/* panel formulario */
+
+.panel{
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+margin-bottom:30px;
+max-width:600px;
+}
+
+/* formulario */
+
+form{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+form input{
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+flex:1;
+}
+
+/* botones */
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:6px;
+background:#27ae60;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#1e874b;
+}
+
+/* tabla */
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+th{
+background:#27ae60;
+color:white;
+padding:12px;
+text-align:left;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+/* botones acciones */
+
+.btn-eliminar{
+background:#e74c3c;
+}
+
+.btn-eliminar:hover{
+background:#c0392b;
+}
+
+.btn-editar{
+background:#3498db;
+}
+
+.btn-editar:hover{
+background:#21618c;
+}
+
+/* avatar usuario */
+
+.avatar{
+width:35px;
+height:35px;
+border-radius:50%;
+margin-right:8px;
+vertical-align:middle;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>👤 Gestión de Usuarios</h1>
+
+<div class="back-button">
+<a href="/menu">← Volver al menú</a>
+</div>
+
+<!-- PANEL FORMULARIO -->
+
+<div class="panel">
+
+<h3>Agregar Usuario</h3>
+
+<form method="POST" action="/usuarios/insertar">
+
+<input type="text" name="nombre" placeholder="Nombre" required>
+
+<input type="email" name="email" placeholder="Email" required>
+
+<input type="password" name="password" placeholder="Contraseña" required>
+
+<button type="submit">Agregar</button>
+
+</form>
+
+</div>
+
+
+<!-- TABLA -->
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Email</th>
+<th>Activo</th>
+<th>Acciones</th>
+</tr>
+
+{% for u in usuarios %}
+
+<tr>
+
+<td>{{ u[0] }}</td>
+
+<td>
+<img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
+{{ u[1] }}
+</td>
+
+<td>{{ u[2] }}</td>
+
+<td>{{ u[4] }}</td>
+
+<td>
+
+<a href="/usuarios/eliminar/{{ u[0] }}"
+onclick="return confirm('¿Seguro que quieres eliminar este usuario?')">
+
+<button class="btn-eliminar">Eliminar</button>
+
+</a>
+
+<a href="/usuarios/editar/{{ u[0] }}">
+<button class="btn-editar">Editar</button>
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

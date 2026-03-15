@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mascotas en Adopción</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+
+body{
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background:#f4f7fb;
+margin:0;
+padding:40px;
+}
+
+/* botón volver */
+
+.back-button{
+margin-bottom:20px;
+}
+
+.back-button a{
+text-decoration:none;
+color:#2f80ed;
+font-weight:bold;
+}
+
+/* título */
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+/* catálogo */
+
+.catalogo{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:25px;
+}
+
+/* tarjetas */
+
+.mascota-card{
+background:white;
+width:220px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+padding:20px;
+text-align:center;
+transition:0.3s;
+}
+
+.mascota-card:hover{
+transform:translateY(-5px);
+}
+
+/* icono animal */
+
+.mascota-img{
+font-size:60px;
+margin-bottom:10px;
+}
+
+/* textos */
+
+.mascota-card h3{
+margin:5px 0;
+}
+
+.mascota-card p{
+margin:5px 0;
+color:#555;
+}
+
+/* botón adoptar */
+
+.adoptar-btn{
+background:#27ae60;
+padding:10px;
+border:none;
+border-radius:6px;
+color:white;
+cursor:pointer;
+margin-top:10px;
+width:100%;
+}
+
+.adoptar-btn:hover{
+background:#1e874b;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="back-button">
+<a href="/menu">← Volver al menú</a>
+</div>
+
+<h1>🐾 Mascotas en Adopción</h1>
+
+<div class="catalogo">
+
+{% for animal in animales %}
+
+<div class="mascota-card">
+
+<div class="mascota-img">
+
+{% set especie = animal[2]|lower %}
+
+{% if especie == "perro" or especie == "canino" %}
+🐶
+{% elif especie == "gato" or especie == "felino" %}
+🐱
+{% else %}
+🐾
+{% endif %}
+
+</div>
+
+<h3>{{animal[1]}}</h3>
+
+<p><b>Especie:</b> {{animal[2]}}</p>
+<p><b>Edad:</b> {{animal[3]}} años</p>
+
+<button class="adoptar-btn">
+Adoptar
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

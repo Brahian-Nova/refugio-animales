@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+
+body{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:#f4f7fb;
+margin:0;
+}
+
+.card{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+width:320px;
+}
+
+h2{
+text-align:center;
+margin-bottom:5px;
+}
+
+.subtitle{
+text-align:center;
+color:#666;
+margin-bottom:20px;
+}
+
+.password-container{
+position:relative;
+}
+
+.password-container input{
+padding-right:40px;
+}
+
+.eye{
+position:absolute;
+right:10px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+}
+
+button{
+width:100%;
+padding:10px;
+background:#2f80ed;
+border:none;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#1c5ec4;
+}
+
+.alert{
+background:#ffdddd;
+color:#c0392b;
+padding:10px;
+border-radius:5px;
+margin-bottom:10px;
+text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>🐾 Refugio de Animales</h2>
+<p class="subtitle">Sistema de gestión de adopciones</p>
+
+<!-- MENSAJES DE ERROR -->
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert">
+{{ messages[0] }}
+</div>
+{% endif %}
+{% endwith %}
+
+<form action="/validar" method="POST">
+
+<label>Email</label>
+
+<input 
+type="email"
+name="email"
+placeholder="correo@ejemplo.com"
+required
+pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+
+<label>Contraseña</label>
+
+<div class="password-container">
+
+<input
+type="password"
+name="password"
+id="password"
+placeholder="Contraseña"
+required>
+
+<span onclick="togglePassword()" class="eye">👁</span>
+
+</div>
+
+<button type="submit">Ingresar</button>
+
+</form>
+
+</div>
+
+<script>
+
+function togglePassword(){
+
+const password = document.getElementById("password");
+
+if(password.type === "password"){
+password.type = "text";
+}else{
+password.type = "password";
+}
+
+}
+
+</script>
+
+</body>
+</html>
