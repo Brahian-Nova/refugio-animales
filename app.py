@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, redirect, flash, session
 import psycopg2
 import re
@@ -11,11 +13,8 @@ app.secret_key = "clave_secreta"
 # -----------------------------------------
 def get_connection():
     return psycopg2.connect(
-        host="localhost",
-        port="5432",
-        database="refugio",
-        user="postgres",
-        password="1234"
+        os.environ["postgresql://postgres:hBrCKTZtNPRtLrHNAYrZdcicrHVuJsvJ@postgres.railway.internal:5432/railway"]
+        
     )
 
 
