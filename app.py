@@ -11,11 +11,12 @@ app.secret_key = "clave_secreta"
 # -----------------------------------------
 # CONEXIÓN A LA BASE DE DATOS
 # -----------------------------------------
+
+
 def get_connection():
-    return psycopg2.connect(
-        os.environ["postgresql://postgres:hBrCKTZtNPRtLrHNAYrZdcicrHVuJsvJ@postgres.railway.internal:5432/railway"]
+    return psycopg2.connect(os.environ["DATABASE_URL"])
         
-    )
+    
 
 
 # -----------------------------------------
