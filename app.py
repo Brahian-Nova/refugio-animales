@@ -146,7 +146,7 @@ def animales():
            animales.edad,
            usuarios.nombre
     FROM animales
-    JOIN usuarios
+    LEFT JOIN usuarios
     ON animales.usuario_id = usuarios.id
     """)
 
@@ -176,16 +176,20 @@ def insertar_animal():
 
     nombre = request.form["nombre"].strip()
     especie = request.form["especie"].strip()
-    edad = request.form["edad"]
-    usuario_id = request.form["usuario_id"]
+    edad = int(request.form["edad"])
+    usuario_id = int(request.form["usuario_id"])
 
     conn = get_connection()
     cur = conn.cursor()
 
+    
     cur.execute(
-        "CALL insertar_animal(%s,%s,%s,%s)",
-        (nombre, especie, edad, usuario_id)
-    )
+"""
+INSERT INTO animales(nombre, especie, edad, usuario_id)
+VALUES (%s,%s,%s,%s)
+""",
+(nombre, especie, edad, usuario_id)
+)
 
     conn.commit()
 
@@ -207,7 +211,7 @@ def eliminar_animal(id):
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("CALL eliminar_animal(%s)", (id,))
+    cur.execute("DELETE FROM animales WHERE id=%s", (id,))
     conn.commit()
 
     cur.close()
@@ -252,9 +256,12 @@ def insertar_usuario():
     cur = conn.cursor()
 
     cur.execute(
-        "CALL insertar_usuario(%s,%s,%s)",
-        (nombre, email, password)
-    )
+"""
+INSERT INTO usuarios(nombre,email,password)
+VALUES(%s,%s,%s)
+""",
+(nombre,email,password)
+)
 
     conn.commit()
 
@@ -274,7 +281,7 @@ def eliminar_usuario(id):
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("CALL eliminar_usuario(%s)", (id,))
+    cur.execute("DELETE FROM usuarios WHERE id=%s",(id,))
     conn.commit()
 
     cur.close()
@@ -317,10 +324,13 @@ def actualizar_usuario():
     cur = conn.cursor()
 
     cur.execute(
-        "CALL actualizar_usuario(%s,%s,%s)",
-        (id, nombre, email)
-    )
-
+"""
+UPDATE usuarios
+SET nombre=%s,email=%s
+WHERE id=%s
+""",
+(nombre,email,id)
+)
     conn.commit()
 
     cur.close()
