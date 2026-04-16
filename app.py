@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from io import BytesIO
 
 import psycopg2
@@ -425,7 +425,7 @@ def adoptar_animal(id):
             "nombre": animal[1],
             "especie": animal[2],
             "edad": animal[3],
-            "fecha_adopcion": datetime.utcnow()
+            "fecha_adopcion": datetime.now(timezone.utc)
         })
 
         conn.commit()
@@ -455,6 +455,14 @@ def adoptados():
         adoptados_data = list(
             db.adoptados.find({}, {"_id": 0}).sort("fecha_adopcion", -1)
         )
+
+        # 🔥 AJUSTE DE ZONA HORARIA
+        for item in adoptados_data:
+            fecha = item.get("fecha_adopcion")
+            if fecha:
+                fecha = fecha - timedelta(hours=5)
+                item["fecha_adopcion"] = fecha.strftime("%Y-%m-%d %H:%M:%S")
+
     except Exception as e:
         print(e)
         flash("No se pudieron cargar los adoptados desde MongoDB")
@@ -481,6 +489,10 @@ def exportar_adoptados():
 
         for item in adoptados_data:
             fecha = item.get("fecha_adopcion")
+            
+            if fecha:
+                fecha = fecha - timedelta(hours=5)
+
             if hasattr(fecha, "strftime"):
                 fecha = fecha.strftime("%Y-%m-%d %H:%M:%S")
 
