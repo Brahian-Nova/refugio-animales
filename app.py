@@ -3,6 +3,8 @@ import os
 from flask import Flask, render_template, request, redirect, flash, session
 import psycopg2
 import re
+from pymongo import MongoClient
+
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
@@ -15,7 +17,11 @@ app.secret_key = "clave_secreta"
 
 def get_connection():
     return psycopg2.connect(os.environ["DATABASE_URL"])
-        
+
+def get_mongo():
+    client = MongoClient(os.environ["MONGO_URL"])
+    db = client["refugio"]
+    return db
     
 
 
@@ -361,7 +367,22 @@ def adopciones():
 
     return render_template("adopciones.html", animales=animales)
 
+@app.route("/test-mongo")
+def test_mongo():
 
+    try:
+        db = get_mongo()
+
+        db.adoptados.insert_one({
+            "nombre": "Prueba",
+            "especie": "Perro",
+            "edad": 1
+        })
+
+        return "Mongo funcionando 🚀"
+
+    except Exception as e:
+        return f"Error Mongo: {e}"
 # -----------------------------------------
 # EJECUTAR APP
 # -----------------------------------------
