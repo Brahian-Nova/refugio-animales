@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animales Adoptados</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+body{
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background:#f4f7fb;
+margin:0;
+padding:40px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:12px;
+margin-bottom:20px;
+}
+
+.header a{
+text-decoration:none;
+font-weight:bold;
+}
+
+.actions{
+display:flex;
+gap:12px;
+}
+
+.btn{
+display:inline-block;
+padding:10px 14px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+color:white;
+background:#2f80ed;
+}
+
+.btn:hover{ background:#1c5ec4; }
+
+.btn-export{ background:#27ae60; }
+.btn-export:hover{ background:#1e874b; }
+
+.alert{
+background:#fff3cd;
+color:#7a5d00;
+border:1px solid #ffe69c;
+padding:10px 12px;
+border-radius:8px;
+margin-bottom:15px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+th, td{
+padding:12px;
+text-align:left;
+border-bottom:1px solid #eee;
+}
+
+th{ background:#2f80ed; color:white; }
+
+.empty{
+margin-top:20px;
+background:white;
+padding:16px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.06);
+color:#555;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/menu">← Volver al menú</a>
+  <div class="actions">
+    <a class="btn btn-export" href="/adoptados/exportar">⬇ Exportar Excel</a>
+  </div>
+</div>
+
+<h1>🏠 Animales Adoptados</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% if adoptados %}
+<table>
+  <thead>
+    <tr>
+      <th>ID Animal</th>
+      <th>Nombre</th>
+      <th>Especie</th>
+      <th>Edad</th>
+      <th>Fecha de adopción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in adoptados %}
+    <tr>
+      <td>{{ item.animal_id }}</td>
+      <td>{{ item.nombre }}</td>
+      <td>{{ item.especie }}</td>
+      <td>{{ item.edad }}</td>
+      <td>
+        {% if item.fecha_adopcion and item.fecha_adopcion.strftime %}
+          {{ item.fecha_adopcion.strftime('%Y-%m-%d %H:%M:%S') }}
+        {% else %}
+          {{ item.fecha_adopcion or '-' }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty">No hay registros de animales adoptados todavía.</div>
+{% endif %}
+
+</body>
+</html>

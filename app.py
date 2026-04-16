@@ -1,10 +1,12 @@
 import os
-
-from flask import Flask, render_template, request, redirect, flash, session
-import psycopg2
 import re
-from pymongo import MongoClient
+from datetime import datetime
+from io import BytesIO
 
+import psycopg2
+from pymongo import MongoClient
+from openpyxl import Workbook
+from flask import Flask, render_template, request, redirect, flash, session, send_file
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
@@ -383,6 +385,128 @@ def test_mongo():
 
     except Exception as e:
         return f"Error Mongo: {e}"
+    
+@app.route("/adoptar/<int:id>", methods=["POST"])
+
+def adoptar_animal(id):
+
+    conn = None
+    cur = None
+
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT id, nombre, especie, edad, adoptado
+            FROM animales
+            WHERE id = %s
+            FOR UPDATE
+        """, (id,))
+        animal = cur.fetchone()
+
+        if not animal:
+            flash("El animal no existe")
+            return redirect("/adopciones")
+
+        if animal[4]:
+            flash("Este animal ya fue adoptado")
+            return redirect("/adopciones")
+
+        cur.execute("""
+            UPDATE animales
+            SET adoptado = TRUE
+            WHERE id = %s
+        """, (id,))
+
+        db = get_mongo()
+        db.adoptados.insert_one({
+            "animal_id": animal[0],
+            "nombre": animal[1],
+            "especie": animal[2],
+            "edad": animal[3],
+            "fecha_adopcion": datetime.utcnow()
+        })
+
+        conn.commit()
+        flash(f"{animal[1]} fue adoptado exitosamente")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(e)
+        flash("No se pudo completar la adopción. Intenta nuevamente.")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+    return redirect("/adopciones")
+
+@app.route("/adoptados")
+def adoptados():
+
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+        db = get_mongo()
+        adoptados_data = list(
+            db.adoptados.find({}, {"_id": 0}).sort("fecha_adopcion", -1)
+        )
+    except Exception as e:
+        print(e)
+        flash("No se pudieron cargar los adoptados desde MongoDB")
+        adoptados_data = []
+
+    return render_template("adoptados.html", adoptados=adoptados_data)
+
+@app.route("/adoptados/exportar")
+def exportar_adoptados():
+
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+        db = get_mongo()
+        adoptados_data = list(
+            db.adoptados.find({}, {"_id": 0}).sort("fecha_adopcion", -1)
+        )
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Adoptados"
+        ws.append(["ID Animal", "Nombre", "Especie", "Edad", "Fecha Adopción"])
+
+        for item in adoptados_data:
+            fecha = item.get("fecha_adopcion")
+            if hasattr(fecha, "strftime"):
+                fecha = fecha.strftime("%Y-%m-%d %H:%M:%S")
+
+            ws.append([
+                item.get("animal_id", ""),
+                item.get("nombre", ""),
+                item.get("especie", ""),
+                item.get("edad", ""),
+                fecha or ""
+            ])
+
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name="animales_adoptados.xlsx",
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+    except Exception as e:
+        print(e)
+        flash("No se pudo exportar el archivo Excel de adoptados")
+        return redirect("/adoptados")
 # -----------------------------------------
 # EJECUTAR APP
 # -----------------------------------------

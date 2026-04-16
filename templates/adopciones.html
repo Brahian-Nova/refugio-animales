@@ -109,7 +109,17 @@ background:#1e874b;
 </div>
 
 <h1>🐾 Mascotas en Adopción</h1>
-
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div style="max-width: 900px; margin: 0 auto 20px auto;">
+    {% for message in messages %}
+    <div style="background:#e8f5e9; color:#1b5e20; border:1px solid #a5d6a7; padding:10px 12px; border-radius:8px; margin-bottom:10px;">
+    {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
 <div class="catalogo">
 
 {% for animal in animales %}
@@ -135,10 +145,14 @@ background:#1e874b;
 <p><b>Especie:</b> {{animal[2]}}</p>
 <p><b>Edad:</b> {{animal[3]}} años</p>
 
-<button class="adoptar-btn">
-Adoptar
-</button>
-
+<form action="/adoptar/{{animal[0]}}" method="POST">
+ <button
+    class="adoptar-btn"
+    type="submit"
+    onclick="return confirm('¿Confirmas la adopción de {{animal[1]}}?')">
+    Adoptar
+  </button>
+</form>
 </div>
 
 {% endfor %}
