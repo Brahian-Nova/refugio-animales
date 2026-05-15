@@ -129,6 +129,9 @@ Ingresa al sistema y luego puedes cambiarla.
 # -----------------------------------------
 # VALIDAR LOGIN
 # -----------------------------------------
+# -----------------------------------------
+# VALIDAR LOGIN
+# -----------------------------------------
 @app.route("/validar", methods=["POST"])
 def validar():
 
@@ -140,6 +143,7 @@ def validar():
         return redirect("/")
 
     patron_email = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
     if not re.match(patron_email, email):
         flash("Formato de correo inválido")
         return redirect("/")
@@ -154,30 +158,40 @@ def validar():
         cur = conn.cursor()
 
         cur.execute("""
-        SELECT * 
-        FROM usuarios
-        WHERE LOWER(email)=LOWER(%s)
-        AND activo=TRUE
-""", (email,))
-        
+            SELECT * 
+            FROM usuarios
+            WHERE LOWER(email)=LOWER(%s)
+            AND activo=TRUE
+        """, (email,))
+
         usuario = cur.fetchone()
 
         cur.close()
         conn.close()
 
-        if usuario and check_password_hash(usuario[3], password):
-            session["usuario"] = usuario[1]
-            return redirect("/menu")
-        else:
-            flash("Usuario o contraseña incorrectos")
-            return redirect("/")
+        # LOGIN COMPATIBLE
+        # acepta contraseñas viejas y nuevas encriptadas
+
+        if usuario:
+
+            password_db = usuario[3]
+
+            acceso = (
+                password_db == password
+                or check_password_hash(password_db, password)
+            )
+
+            if acceso:
+                session["usuario"] = usuario[1]
+                return redirect("/menu")
+
+        flash("Usuario o contraseña incorrectos")
+        return redirect("/")
 
     except Exception as e:
         print(e)
         flash("Error de conexión con la base de datos")
         return redirect("/")
-
-
 # -----------------------------------------
 # MENÚ PRINCIPAL
 # -----------------------------------------
