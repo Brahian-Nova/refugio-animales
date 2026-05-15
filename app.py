@@ -24,6 +24,10 @@ app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USERNAME"] = os.environ["EMAIL_USER"]
 app.config["MAIL_PASSWORD"] = os.environ["EMAIL_PASSWORD"]
 
+app.config["MAIL_SUPPRESS_SEND"] = False
+app.config["MAIL_DEBUG"] = True
+app.config["MAIL_TIMEOUT"] = 20
+
 mail = Mail(app)
 
 
