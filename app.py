@@ -19,14 +19,10 @@ app.secret_key = "clave_secreta"
 # -----------------------------------------
 
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USE_SSL"] = True
 app.config["MAIL_USERNAME"] = os.environ["EMAIL_USER"]
 app.config["MAIL_PASSWORD"] = os.environ["EMAIL_PASSWORD"]
-
-app.config["MAIL_SUPPRESS_SEND"] = False
-app.config["MAIL_DEBUG"] = True
-app.config["MAIL_TIMEOUT"] = 20
 
 mail = Mail(app)
 
@@ -64,51 +60,45 @@ def login():
 
 @app.route("/recuperar")
 def recuperar():
-
     return render_template("recuperar.html")
 
 
 @app.route("/recuperar-password", methods=["POST"])
 def recuperar_password():
 
-    email = request.form["email"]
+    email = request.form["email"].strip()
 
-    conn = get_connection()
-    cur = conn.cursor()
+    conn = None
+    cur = None
 
-    cur.execute("""
-        SELECT id, nombre
-        FROM usuarios
-        WHERE email=%s
-    """, (email,))
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
 
-    usuario = cur.fetchone()
+        cur.execute("""
+            SELECT id, nombre
+            FROM usuarios
+            WHERE LOWER(email) = LOWER(%s)
+              AND activo = TRUE
+        """, (email,))
 
-    if not usuario:
+        usuario = cur.fetchone()
 
-        flash("El correo no existe")
-        return redirect("/recuperar")
+        if not usuario:
+            flash("El correo no existe")
+            return redirect("/recuperar")
 
-    caracteres = string.ascii_letters + string.digits
-    nueva_password = ''.join(random.choice(caracteres) for i in range(8))
+        caracteres = string.ascii_letters + string.digits
+        nueva_password = ''.join(random.choice(caracteres) for _ in range(8))
+        password_hash = generate_password_hash(nueva_password)
 
-    password_hash = generate_password_hash(nueva_password)
+        mensaje = Message(
+            "Recuperación de contraseña",
+            sender=app.config["MAIL_USERNAME"],
+            recipients=[email]
+        )
 
-    cur.execute("""
-        UPDATE usuarios
-        SET password=%s
-        WHERE email=%s
-    """, (password_hash, email))
-
-    conn.commit()
-
-    mensaje = Message(
-        "Recuperación de contraseña",
-        sender=os.environ["EMAIL_USER"],
-        recipients=[email]
-    )
-
-    mensaje.body = f"""
+        mensaje.body = f"""
 Hola {usuario[1]}
 
 Tu nueva contraseña temporal es:
@@ -118,14 +108,31 @@ Tu nueva contraseña temporal es:
 Ingresa al sistema y luego puedes cambiarla.
 """
 
-    mail.send(mensaje)
+        mail.send(mensaje)
 
-    cur.close()
-    conn.close()
+        cur.execute("""
+            UPDATE usuarios
+            SET password=%s
+            WHERE id=%s
+        """, (password_hash, usuario[0]))
 
-    flash("Se envió una nueva contraseña al correo")
-    return redirect("/")
+        conn.commit()
 
+        flash("Se envió una nueva contraseña al correo")
+        return redirect("/")
+
+    except Exception as e:
+        print(e)
+        if conn:
+            conn.rollback()
+        flash("No se pudo enviar el correo")
+        return redirect("/recuperar")
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 # -----------------------------------------
 # VALIDAR LOGIN
 # -----------------------------------------
