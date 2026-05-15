@@ -8,9 +8,23 @@ from pymongo import MongoClient
 from openpyxl import Workbook
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, flash, session, send_file
+from flask_mail import Mail, Message
+import random
+import string
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
+# -----------------------------------------
+# CONFIGURACIÓN CORREO
+# -----------------------------------------
+
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.environ["EMAIL_USER"]
+app.config["MAIL_PASSWORD"] = os.environ["EMAIL_PASSWORD"]
+
+mail = Mail(app)
 
 
 # -----------------------------------------
@@ -40,6 +54,73 @@ def login():
 
     return render_template("login.html")
 
+# -----------------------------------------
+# RECUPERAR CONTRASEÑA
+# -----------------------------------------
+
+@app.route("/recuperar")
+def recuperar():
+
+    return render_template("recuperar.html")
+
+
+@app.route("/recuperar-password", methods=["POST"])
+def recuperar_password():
+
+    email = request.form["email"]
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, nombre
+        FROM usuarios
+        WHERE email=%s
+    """, (email,))
+
+    usuario = cur.fetchone()
+
+    if not usuario:
+
+        flash("El correo no existe")
+        return redirect("/recuperar")
+
+    caracteres = string.ascii_letters + string.digits
+    nueva_password = ''.join(random.choice(caracteres) for i in range(8))
+
+    password_hash = generate_password_hash(nueva_password)
+
+    cur.execute("""
+        UPDATE usuarios
+        SET password=%s
+        WHERE email=%s
+    """, (password_hash, email))
+
+    conn.commit()
+
+    mensaje = Message(
+        "Recuperación de contraseña",
+        sender=os.environ["EMAIL_USER"],
+        recipients=[email]
+    )
+
+    mensaje.body = f"""
+Hola {usuario[1]}
+
+Tu nueva contraseña temporal es:
+
+{nueva_password}
+
+Ingresa al sistema y luego puedes cambiarla.
+"""
+
+    mail.send(mensaje)
+
+    cur.close()
+    conn.close()
+
+    flash("Se envió una nueva contraseña al correo")
+    return redirect("/")
 
 # -----------------------------------------
 # VALIDAR LOGIN
