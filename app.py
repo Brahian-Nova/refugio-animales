@@ -6,6 +6,7 @@ from io import BytesIO
 import psycopg2
 from pymongo import MongoClient
 from openpyxl import Workbook
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, flash, session, send_file
 
 app = Flask(__name__)
@@ -68,19 +69,18 @@ def validar():
         cur = conn.cursor()
 
         cur.execute("""
-            SELECT * 
-            FROM usuarios
-            WHERE LOWER(email)=LOWER(%s)
-            AND password=%s
-            AND activo=TRUE
-        """, (email, password))
-
+        SELECT * 
+        FROM usuarios
+        WHERE LOWER(email)=LOWER(%s)
+        AND activo=TRUE
+""", (email,))
+        
         usuario = cur.fetchone()
 
         cur.close()
         conn.close()
 
-        if usuario:
+        if usuario and check_password_hash(usuario[3], password):
             session["usuario"] = usuario[1]
             return redirect("/menu")
         else:
@@ -259,6 +259,9 @@ def insertar_usuario():
     nombre = request.form["nombre"]
     email = request.form["email"]
     password = request.form["password"]
+    
+    #encriptar contraseña
+    password_hash = generate_password_hash(password)
 
     conn = get_connection()
     cur = conn.cursor()
@@ -268,7 +271,7 @@ def insertar_usuario():
 INSERT INTO usuarios(nombre,email,password)
 VALUES(%s,%s,%s)
 """,
-(nombre,email,password)
+(nombre,email,password_hash)
 )
 
     conn.commit()
